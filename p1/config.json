@@ -1,0 +1,18 @@
+{
+    "box": "generic/alpine37",
+    "provider": "virtualbox",
+    "server": {
+        "name": "server",
+        "hostname": "jmilhasS",
+        "ip": "192.168.56.110",
+        "cpu": 1,
+        "ram": 1024
+    },
+    "serverworker": {
+        "name": "serverworker",
+        "hostname": "jmilhasSK",
+        "ip": "192.168.56.111",
+        "cpu": 1,
+        "ram": 1024
+    }
+}

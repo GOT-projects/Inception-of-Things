@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'json'
+if File.exist?('config.json')
+  begin
+    data = JSON.parse(File.read('config.json'))
+  rescue JSON::ParserError => e
+    puts "Failed to parse config.json: #{e.message}"
+    exit 1
+  end
+else
+  puts "config.json not found"
+  exit 1
+end
+
+Vagrant.configure("2") do |config|
+  #first config machine
+  #DOC https://developer.hashicorp.com/vagrant/docs/providers/configuration
+  config.vm.define data["server"]["name"] do |server|
+    server.vm.box = data["box"]
+    server.vm.network "private_network", ip: data["server"]["ip"], virtualbox__intnet: true
+    server.vm.hostname = "jmilhasS"
+    server.vm.provider data["provider"] do |v|
+      v.name = data["server"]["name"]
+      v.memory = data["server"]["ram"]
+      v.cpus = data["server"]["cpu"]
+    end
+    server.vm.provision "shell", inline: <<-SHELL
+      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--cluster-init" sh -
+      sudo cp /etc/ranger/k3s.yaml /vagrant/kubeconfigS
+      sed -i "s/127\.0\.0\.1/#{data["server"]["ip"]}" /vagrant/kubeconfigS
+    SHELL
+    #DOC https://developer.hashicorp.com/vagrant/docs/provisioning/file
+    # server.provider "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
+  end
+  #second config machine
+  #DOC https://developer.hashicorp.com/vagrant/docs/providers/configuration
+  config.vm.define data["serverworker"]["name"] do |serverworker|
+    serverworker.vm.box = data["box"]
+    serverworker.vm.network "private_network", ip: data["serverworker"]["ip"], virtualbox__intnet: true
+    serverworker.vm.hostname = data["serverworker"]["name"]
+    serverworker.vm.provider data["provider"] do |v|
+      v.name = data["serverworker"]["name"]
+      v.memory = data["serverworker"]["ram"]
+      v.cpus = data["serverworker"]["cpu"]
+    end
+    serverworker.vm.provision "shell", inline: <<-SHELL
+      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--cluster-init" sh -
+      sudo cp /etc/ranger/k3s.yaml /vagrant/kubeconfigSK
+      sed -i "s/127\.0\.0\.1/#{data["server"]["ip"]}" /vagrant/kubeconfigS
+    SHELL
+    #DOC https://developer.hashicorp.com/vagrant/docs/provisioning/file
+    serverworker.provider "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
+   end
+end

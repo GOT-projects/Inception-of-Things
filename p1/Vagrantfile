@@ -15,8 +15,6 @@ else
 end
 
 Vagrant.configure("2") do |config|
-  #first config machine
-  #DOC https://developer.hashicorp.com/vagrant/docs/providers/configuration
   config.vm.define data["server"]["name"] do |server|
     server.vm.box = data["box"]
     server.vm.network "private_network", ip: data["server"]["ip"], virtualbox__intnet: true
@@ -26,16 +24,8 @@ Vagrant.configure("2") do |config|
       v.memory = data["server"]["ram"]
       v.cpus = data["server"]["cpu"]
     end
-    server.vm.provision "shell", inline: <<-SHELL
-      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--cluster-init" sh -
-      sudo cp /etc/ranger/k3s.yaml /vagrant/kubeconfigS
-      sed -i "s/127\.0\.0\.1/#{data["server"]["ip"]}" /vagrant/kubeconfigS
-    SHELL
-    #DOC https://developer.hashicorp.com/vagrant/docs/provisioning/file
-    # server.provider "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
   end
-  #second config machine
-  #DOC https://developer.hashicorp.com/vagrant/docs/providers/configuration
+
   config.vm.define data["serverworker"]["name"] do |serverworker|
     serverworker.vm.box = data["box"]
     serverworker.vm.network "private_network", ip: data["serverworker"]["ip"], virtualbox__intnet: true
@@ -45,12 +35,8 @@ Vagrant.configure("2") do |config|
       v.memory = data["serverworker"]["ram"]
       v.cpus = data["serverworker"]["cpu"]
     end
-    serverworker.vm.provision "shell", inline: <<-SHELL
-      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--cluster-init" sh -
-      sudo cp /etc/ranger/k3s.yaml /vagrant/kubeconfigSK
-      sed -i "s/127\.0\.0\.1/#{data["server"]["ip"]}" /vagrant/kubeconfigS
-    SHELL
-    #DOC https://developer.hashicorp.com/vagrant/docs/provisioning/file
-    serverworker.provider "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
    end
+  config.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/home/vagrant/.ssh/id_rsa"
+  config.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/home/vagrant/id_rsa.pub"
+  config.vm.provision "shell", privileged: true, path: "./script/install.sh" 
 end

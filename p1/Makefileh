@@ -1,0 +1,3 @@
+all: 
+	@scp -r vm:/home/jmilhas/. ~/workspace/Inception-of-Things
+	vagrant  

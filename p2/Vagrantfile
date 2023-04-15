@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'json'
+if File.exist?('./confs/config.json')
+  begin
+    data = JSON.parse(File.read('./confs/config.json'))
+  rescue JSON::ParserError => e
+    puts "Failed to parse config.json: #{e.message}"
+    exit 1
+  end
+else
+  puts "config.json not found"
+  exit 1
+end
+
+Vagrant.configure("2") do |config|
+  config.vm.define data["server"]["name"] do |server|
+    server.vm.box = data["box"]
+    server.vm.network "private_network", ip: data["server"]["ip"], virtualbox__intnet: true
+    server.vm.network "forwarded_port", guest: data["server"]["port_guest"],host: data["server"]["port_host"]
+    server.vm.provision "shell", privileged: true, path: "./script/install.sh" 
+    server.vm.hostname = "jmilhasS"
+    server.vm.provider data["provider"] do |v|
+      v.gui = false
+      v.name = data["server"]["name"]
+      v.memory = data["server"]["ram"]
+      v.cpus = data["server"]["cpu"]
+    end
+  end
+  config.vm.provision "file", source: "./confs/apps", destination: "/home/vagrant/."
+end

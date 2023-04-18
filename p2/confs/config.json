@@ -1,12 +1,23 @@
 {
+<<<<<<< HEAD
     "box": "generic/alpine37",
+=======
+    "box": "generic/alpine317",
+>>>>>>> affbc3c2a9b343c2aebb31235157b12fbbda41cd
     "provider": "virtualbox",
     "server": {
         "name": "server",
         "hostname": "jmilhasS",
         "ip": "192.168.56.110",
+<<<<<<< HEAD
         "port": 8080,
         "cpu": 2,
         "ram": 1024
+=======
+        "port_guest":80, 
+        "port_host":8080, 
+        "cpu": 2,
+        "ram": 2024
+>>>>>>> affbc3c2a9b343c2aebb31235157b12fbbda41cd
     }
 }

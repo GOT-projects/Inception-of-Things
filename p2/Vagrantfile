@@ -18,20 +18,15 @@ Vagrant.configure("2") do |config|
   config.vm.define data["server"]["name"] do |server|
     server.vm.box = data["box"]
     server.vm.network "private_network", ip: data["server"]["ip"], virtualbox__intnet: true
-    server.vm.network "forwarded_port", guest: data["server"]["port"], host:data["server"]["port"] 
+    server.vm.network "forwarded_port", guest: data["server"]["port_guest"],host: data["server"]["port_host"]
+    server.vm.provision "shell", privileged: true, path: "./script/install.sh" 
     server.vm.hostname = "jmilhasS"
     server.vm.provider data["provider"] do |v|
       v.gui = false
-      v.name = data["server"]["hostname"]
+      v.name = data["server"]["name"]
       v.memory = data["server"]["ram"]
       v.cpus = data["server"]["cpu"]
     end
-  j server.vm.ssh.keys_only = true
-    server.vm.ssh.insert_key = true
-    server.vm.ssh.keys_only = true
   end
-  config.vm.provision "file", source: "./confs/app1.yml", destination: "/home/vagrant/apps"
-  config.vm.provision "file", source: "./confs/app2.yml", destination: "/home/vagrant/apps"
-  config.vm.provision "file", source: "./confs/app3.yml", destination: "/home/vagrant/apps"
-  config.vm.provision "shell", privileged: true, path: "./script/install.sh" 
+  config.vm.provision "file", source: "./confs/apps", destination: "/home/vagrant/."
 end

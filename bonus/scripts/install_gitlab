@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Function to print a message with the index number
+print_msg() {
+    export IDX=$(expr $IDX + 1)
+    echo -e "\033[32m[$IDX] $1\033[0m"
+}
+
+
+install_gitlab(){
+    print_msg "Add repo"
+    install_metric
+}
+
+install_gitlab
+

@@ -92,7 +92,7 @@ case "$1" in
         sudo kubectl port-forward -n argocd svc/argocd-server 8080:443 >/dev/null & echo $! > process_id.txt
         echo "Process launched successfully! ID: $(cat process_id.txt)";;
     "deploy")
-        check_command docker kubectl k3d
+        check_command docker k3d kubectl
         delete_cluster
         install_argo
         echo "deploy done!!\nFor start ArgoCD: install start";;

@@ -6,10 +6,37 @@ print_msg() {
     echo -e "\033[32m[$IDX] $1\033[0m"
 }
 
+uninstall_Metallb(){
+  print_msg "Uninstall metallb"
+  kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+}
+
+install_Metallb(){
+  print_msg "Install metallb"
+  uninstall_Metallb
+  kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+
+}
+
+update_helm(){
+  print_msg "Install heml"
+  helm repo add gitlab https://charts.gitlab.io/
+  helm repo update
+}
+
 
 install_gitlab(){
-    print_msg "Add repo"
-    install_metric
+  install_Metallb
+  update_helm
+  kubectl create namespace gitlab
+  helm upgrade --install gitlab gitlab/gitlab \
+    --namespace gitlab \
+    --timeout 600s \
+    --set global.hosts.domain=example.com \
+    --set global.hosts.externalIP=10.10.10.10 \
+    --set certmanager-issuer.email=me@example.com \
+    --set postgresql.image.tag=13.6.0
+
 }
 
 install_gitlab

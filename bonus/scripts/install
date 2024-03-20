@@ -61,12 +61,12 @@ check_command() {
 # Function to delete the cluster and namespaces
 delete_cluster() {
   print_msg "Deleting namespaces"
-   kubectl delete namespace argocd dev gitlab metrics-server --ignore-not-found=true
+  sudo kubectl delete namespace argocd dev gitlab metrics-server --ignore-not-found=true
   print_msg "Deleting cluster"
-   k3d cluster delete $CLUSTER_NAME
+  sudo k3d cluster delete $CLUSTER_NAME
   print_msg "Deleting services helm"
-   helm delete my-release
-  kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.1/cert-manager.crds.yaml
+  sudo helm delete my-release
+  sudo kubectl delete -f https://github.com/cert-manager/cert-manager/releases/download/v1.11.1/cert-manager.crds.yaml
 }
 
 
@@ -74,18 +74,18 @@ delete_cluster() {
 # # Function to create the cluster and deploy ArgoCD and the app
 install_argo() {
   print_msg "Creating cluster"
-   k3d cluster create $CLUSTER_NAME --wait --timeout 120s
+  sudo k3d cluster create $CLUSTER_NAME --wait --timeout 120s
 
   print_msg "Creating namespaces"
-   kubectl create namespace argocd
-   kubectl create namespace dev
+  sudo kubectl create namespace argocd
+  sudo kubectl create namespace dev
 
   bash ./scripts/install_gitlab
 
   print_msg "Deploying ArgoCD"
-   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+  sudo kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
   print_msg "Waiting ArgoCD"
-   kubectl wait --timeout $WAIT_TIMEOUT --for=condition=Ready pods --all -n argocd
+  sudo kubectl wait --timeout $WAIT_TIMEOUT --for=condition=Ready pods --all -n argocd
 
   # print_msg "Deploying app"
   #  kubectl apply -f ./config/configs.yml
@@ -93,8 +93,8 @@ install_argo() {
   #  kubectl wait --timeout $WAIT_TIMEOUT --for=condition=Ready pods --all -n argocd
 
   print_msg "Getting admin password"
-  PASS=$( kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)
-  PASSGITLAB=$( kkubectl get secret -n gitlab gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 -d)
+  PASS=$( sudo kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)
+  PASSGITLAB=$(sudo kubectl get secret -n gitlab gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 -d)
   printf "Password GitLab\n\n\troot\n\t%s\n" "$PASSGITLAB"
   printf "Password ArgoCD\n\n\tadmin\n\t%s\n" "$PASS"
 }
@@ -102,11 +102,11 @@ install_argo() {
 case "$1" in
     "start")
         # Launching the command and storing the process ID in a file
-        if [[ $(kubectl get namespace argocd --no-headers --output=custom-columns=NAME:.metadata.name 2>/dev/null) != "argocd" ]]; then
+        if [[ $(sudo kubectl get namespace argocd --no-headers --output=custom-columns=NAME:.metadata.name 2>/dev/null) != "argocd" ]]; then
             echo "The 'argocd' namespace does not exist."
             exit 1
         fi
-         kubectl port-forward -n argocd svc/argocd-server 8080:443 >/dev/null & echo $! > process_id.txt
+         sudo kubectl port-forward -n argocd svc/argocd-server 8080:443 >/dev/null & echo $! > process_id.txt
         echo "Process launched successfully! ID: $(cat process_id.txt)";;
     "deploy")
         check_command

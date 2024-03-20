@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+DOMAIN="k3d.gitlab.com"
 
 # Function to print a message with the index number
 print_msg() {
@@ -15,33 +17,48 @@ install_Metallb(){
   uninstall_Metallb
   print_msg "Install metallb"
   sudo kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+  sleep 10
+  print_msg "Waiting pods metallb running"
+  sudo kubectl wait pod --all --for=condition=Ready -n metallb-system
+  print_msg "Apply ConfigMap"
   sudo kubectl apply -f ../ConfigMap/.
-
 }
 
 update_helm(){
   print_msg "Install heml"
-  sudo helm repo add gitlab https://charts.gitlab.io/
-  sudo helm repo update
+  helm repo add gitlab https://charts.gitlab.io/
+  helm repo update
 }
 
 
 install_gitlab(){
-  #install_Metallb
-  #update_helm
+  install_Metallb
+  update_helm
+  print_msg "Create namespace"
   sudo kubectl create namespace gitlab
+  print_msg "Install gitlab"
   sudo helm upgrade --install gitlab gitlab/gitlab \
-    --namespace gitlab \
-    --timeout 600s \
-    --set global.hosts.domain=jmilhas \
-    --set global.hosts.externalIP=12.12.2.12 \
-    --set certmanager-issuer.email=me@example.com \
-    --set postgresql.image.tag=13.6.0 \
-    --set global.edition=ce
-  print_msg "Password gitlab"
-  sudo kubectl get secret gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode ; echo
-
+      -n gitlab \
+      -f https://gitlab.com/gitlab-org/charts/gitlab/raw/master/examples/values-minikube-minimum.yaml \
+      --set global.hosts.domain=${DOMAIN} \
+      --set global.hosts.https=false \
+      --set global.edition=ce \
+      --set runners.install=false \
+      --timeout 600s
+  print_msg "Wait service running"
+  sudo kubectl wait --for=condition=ready --timeout=1200s pod -l app=webservice -n gitlab
+  print_msg "Apply ingress controller"
+  sudo kubectl apply -f ./ingress/ingress-gitlab.yaml
+  sleep 10
+  PASS=$(sudo kubectl get secret gitlab-gitlab-initial-root-password -n gitlab -ojsonpath='{.data.password}' | base64 --decode)
+  IP=$(sudo kubectl get svc -n argocd | grep LoadBalancer | awk '{ print $4}')
+  echo ""
+  echo "-----------------------------------------------------------------------------"
+  echo "gitlab: https://${DOMAIN}"
+  printf "\ntroot\n\t%s\n" "$PASS"
+  printf "Dont forget to add to your /etc/hosts:\n ${IP} ${DOMAIN}\n"
+  echo "-----------------------------------------------------------------------------"
+  echo ""
 }
 
 install_gitlab
-

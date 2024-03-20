@@ -8,34 +8,38 @@ print_msg() {
 
 uninstall_Metallb(){
   print_msg "Uninstall metallb"
-  kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+  sudo kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
 }
 
 install_Metallb(){
-  print_msg "Install metallb"
   uninstall_Metallb
-  kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+  print_msg "Install metallb"
+  sudo kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
+  sudo kubectl apply -f ../ConfigMap/.
 
 }
 
 update_helm(){
   print_msg "Install heml"
-  helm repo add gitlab https://charts.gitlab.io/
-  helm repo update
+  sudo helm repo add gitlab https://charts.gitlab.io/
+  sudo helm repo update
 }
 
 
 install_gitlab(){
-  install_Metallb
-  update_helm
-  kubectl create namespace gitlab
-  helm upgrade --install gitlab gitlab/gitlab \
+  #install_Metallb
+  #update_helm
+  sudo kubectl create namespace gitlab
+  sudo helm upgrade --install gitlab gitlab/gitlab \
     --namespace gitlab \
     --timeout 600s \
-    --set global.hosts.domain=example.com \
-    --set global.hosts.externalIP=10.10.10.10 \
+    --set global.hosts.domain=jmilhas \
+    --set global.hosts.externalIP=12.12.2.12 \
     --set certmanager-issuer.email=me@example.com \
-    --set postgresql.image.tag=13.6.0
+    --set postgresql.image.tag=13.6.0 \
+    --set global.edition=ce
+  print_msg "Password gitlab"
+  sudo kubectl get secret gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' | base64 --decode ; echo
 
 }
 

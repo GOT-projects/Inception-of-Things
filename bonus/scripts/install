@@ -13,7 +13,7 @@ print_msg() {
 
 # Function to check if a command exists and install it if necessary
 check_command() {
-    list=("docker" "kubectl" "k3d" "helm", "glab")
+    list=("docker" "kubectl" "k3d" "helm")
     for command in "${list[@]}"; do
       if ! [ -x "$(command -v $command)" ]; then
         print_msg "Installing $command"

@@ -120,7 +120,7 @@ case "$1" in
         echo -e "Gitlab done!!\n";;
     "argocd")
         print_msg "Appy config to gitlab"
-        sudo kubectl apply -f ./scripts/config/.
+        sudo kubectl apply -f ./config/configs.yml
     ;;
     "delete")
         delete_cluster

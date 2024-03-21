@@ -114,8 +114,8 @@ install_argo() {
 case "$1" in
     "gitlab")
         check_command
-        delete_cluster
-        install_cluster
+        #delete_cluster
+        #install_cluster
         bash ./install_gitlab
         echo -e "Gitlab done!!\n";;
     "argocd")

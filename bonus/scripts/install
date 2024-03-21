@@ -118,6 +118,10 @@ case "$1" in
         check_command
         install_gitlab
         echo -e "Gitlab done!!\n";;
+    "argocd")
+        print_msg "Appy config to gitlab"
+        sudo kubectl apply -f ./scripts/config/.
+    ;;
     "delete")
         delete_cluster
         echo -e "Namespace deleted successfully!";;

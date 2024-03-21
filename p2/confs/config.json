@@ -2,8 +2,8 @@
     "box": "generic/alpine312",
     "provider": "virtualbox",
     "server": {
-        "name": "Server",
-        "hostname": "jmilhasS",
+        "name": "rcuminalS",
+        "hostname": "rcuminalS",
         "ip": "192.168.56.110",
         "port_guest": 80,
         "port_host": 8080,

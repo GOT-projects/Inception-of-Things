@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   config.vm.define data["server"]["name"] do |server|
     server.vm.box = data["box"]
     server.vm.network "private_network", ip: data["server"]["ip"], virtualbox__intnet: true
-    server.vm.hostname = "jmilhasS"
+    server.vm.hostname = data["server"]["name"]
     server.vm.provider data["provider"] do |v|
       v.name = data["server"]["name"]
       v.memory = data["server"]["ram"]
@@ -35,7 +35,7 @@ Vagrant.configure("2") do |config|
   config.vm.define data["serverworker"]["name"] do |serverworker|
     serverworker.vm.box = data["box"]
     serverworker.vm.network "private_network", ip: data["serverworker"]["ip"], virtualbox__intnet: true
-    serverworker.vm.hostname = "jmilhasSK"
+    serverworker.vm.hostname = data["serverworker"]["name"]
     serverworker.vm.provider data["provider"] do |v|
       v.name = data["serverworker"]["name"]
       v.memory = data["serverworker"]["ram"]

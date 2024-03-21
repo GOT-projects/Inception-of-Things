@@ -2,15 +2,15 @@
     "box": "generic/alpine312",
     "provider": "virtualbox",
     "server": {
-        "name": "Server",
-        "hostname": "jmilhasS",
+        "name": "rcuminalS",
+        "hostname": "rcuminalS",
         "ip": "192.168.56.110",
         "cpu": 1,
         "ram": 1024
     },
     "serverworker": {
-        "name": "ServerWorker",
-        "hostname": "jmilhasSW",
+        "name": "rcuminalSW",
+        "hostname": "rcuminalSW",
         "ip": "192.168.56.111",
         "cpu": 1,
         "ram": 1024

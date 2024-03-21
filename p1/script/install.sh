@@ -18,7 +18,7 @@ current_ip=$(/sbin/ip -o -4 addr list eth1 | awk '{print $4}' | cut -d/ -f1)
 echo [5] ip ${current_ip}
 echo [INFO] hostname $(hostname)
 
-if [ $(hostname) = "jmilhasS" ]
+if [ $(hostname) = "rcuminalS" ]
     then
         echo [6] install k3s
         curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--bind-address=${current_ip} --flannel-iface=eth1 --write-kubeconfig-mode 644" sh -

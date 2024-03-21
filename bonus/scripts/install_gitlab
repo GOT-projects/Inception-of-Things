@@ -8,22 +8,6 @@ print_msg() {
     echo -e "\033[32m[$IDX] $1\033[0m"
 }
 
-uninstall_Metallb(){
-  print_msg "Uninstall metallb"
-  sudo kubectl delete -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
-}
-
-install_Metallb(){
-  uninstall_Metallb
-  print_msg "Install metallb"
-  sudo kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.3/config/manifests/metallb-native.yaml
-  sleep 10
-  print_msg "Waiting pods metallb running"
-  sudo kubectl wait pod --all --for=condition=Ready -n metallb-system
-  print_msg "Apply ConfigMap"
-  sudo kubectl apply -f ../ConfigMap/.
-}
-
 update_helm(){
   print_msg "Install heml"
   helm repo add gitlab https://charts.gitlab.io/
@@ -32,7 +16,6 @@ update_helm(){
 
 
 install_gitlab(){
-  install_Metallb
   update_helm
   print_msg "Create namespace"
   sudo kubectl create namespace gitlab
